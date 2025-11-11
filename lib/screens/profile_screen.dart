@@ -1,6 +1,9 @@
 import 'package:animeverse/widgets/app_scaffold.dart';
 import 'package:animeverse/widgets/profile_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../config/routes.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -188,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
               margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Implement logout functionality
+                  context.go(AppRoutes.signIn);
                 },
                 icon: Icon(
                   Icons.logout,
@@ -215,7 +218,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: screenHeight * 0.03),
+            SizedBox(height: screenHeight * 0.1),
           ],
         ),
       ),

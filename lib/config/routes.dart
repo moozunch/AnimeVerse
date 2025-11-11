@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+// Screens
 import '../screens/detail_screen.dart';
 import '../screens/favorite_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/signin_screen.dart';
 import '../screens/signup_screen.dart';
+
+// Bottom navigation shell wrapper
 import '../widgets/bottom_navigation_shell.dart';
 
-//ngatur logika routing termasuk errornya
-
+// ------------------ Route name constants ------------------
 class AppRoutes {
-  static const String signIn = '/sign-in';
-  static const String signUp = '/sign-up';
-  static const String home = '/home';
-  static const String favorites = '/favorites';
-  static const String profile = '/profile';
-  static const String details = '/details';
+  static const signIn = '/sign-in';
+  static const signUp = '/sign-up';
+  static const home = '/home';
+  static const favorites = '/favorites';
+  static const profile = '/profile';
+  static const details = '/details'; // usage: /details/:id
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(); //! darimana
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(); //! kemana
+// Navigator keys
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _homeBranchKey = GlobalKey<NavigatorState>();
+final _favBranchKey = GlobalKey<NavigatorState>();
+final _profileBranchKey = GlobalKey<NavigatorState>();
 
 GoRouter createRouter() {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.home,
     routes: [
+      // Auth (outside shell)
       GoRoute(
         path: AppRoutes.signIn,
         name: 'sign-in',
@@ -38,7 +44,7 @@ GoRouter createRouter() {
         name: 'sign-up',
         builder: (context, state) => const SignUpScreen(),
       ),
-
+      // Detail (modal over shell)
       GoRoute(
         path: '${AppRoutes.details}/:id',
         name: 'detail',
@@ -46,29 +52,41 @@ GoRouter createRouter() {
         builder: (context, state) {
           final animeId = state.pathParameters['id'] ?? '';
           return DetailScreen(animeId: animeId);
-        }
-      ),
-
-      ShellRoute( //biasa untuk bottom navhiation
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) {
-          return BottomNavigationShell(child: child);
         },
-        routes: [
-          GoRoute(
-            path: AppRoutes.home,
-            name: 'home',
-            builder: (context, state) => const HomeScreen(),
+      ),
+      // Shell with bottom nav (IndexedStack keeps state per tab)
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navShell) => BottomNavigationShell(child: navShell),
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _homeBranchKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                name: 'home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: AppRoutes.favorites,
-            name: 'favorite',
-            builder: (context, state) => const FavoriteScreen(),
+          StatefulShellBranch(
+            navigatorKey: _favBranchKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.favorites,
+                name: 'favorite',
+                builder: (context, state) => const FavoriteScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: AppRoutes.profile,
-            name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
+          StatefulShellBranch(
+            navigatorKey: _profileBranchKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                name: 'profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),
@@ -80,10 +98,7 @@ GoRouter createRouter() {
           children: [
             const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text(
-              '404 - Page Not Found',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('404 - Page Not Found', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
             Text('Path: ${state.uri.path}'),
             const SizedBox(height: 16),
