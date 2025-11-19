@@ -1,39 +1,51 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// Screens
 import '../screens/detail_screen.dart';
 import '../screens/favorite_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/signin_screen.dart';
 import '../screens/signup_screen.dart';
-
-// Bottom navigation shell wrapper
 import '../widgets/bottom_navigation_shell.dart';
 
-// ------------------ Route name constants ------------------
 class AppRoutes {
-  static const signIn = '/sign-in';
-  static const signUp = '/sign-up';
-  static const home = '/home';
-  static const favorites = '/favorites';
-  static const profile = '/profile';
-  static const details = '/details'; // usage: /details/:id
+  static const String signIn = '/sign-in';
+  static const String signUp = '/sign-up';
+  static const String home = '/home';
+  static const String favorites = '/favorites';
+  static const String profile = '/profile';
+  static const String details = '/details';
 }
 
-// Navigator keys
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _homeBranchKey = GlobalKey<NavigatorState>();
-final _favBranchKey = GlobalKey<NavigatorState>();
-final _profileBranchKey = GlobalKey<NavigatorState>();
-
 GoRouter createRouter() {
+  final GlobalKey<NavigatorState> rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.home,
+    redirect: (context, state) {
+      final user = FirebaseAuth.instance.currentUser;
+      final isAuthenticated = user != null;
+      final isAuthRoute =
+          state.matchedLocation == AppRoutes.signIn ||
+          state.matchedLocation == AppRoutes.signUp;
+
+      if (!isAuthenticated && !isAuthRoute) {
+        return AppRoutes.signIn;
+      }
+
+      if (isAuthenticated && isAuthRoute) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
+    refreshListenable: AuthStateNotifier(),
+
     routes: [
-      // Auth (outside shell)
       GoRoute(
         path: AppRoutes.signIn,
         name: 'sign-in',
@@ -44,22 +56,23 @@ GoRouter createRouter() {
         name: 'sign-up',
         builder: (context, state) => const SignUpScreen(),
       ),
-      // Detail (modal over shell)
+
       GoRoute(
         path: '${AppRoutes.details}/:id',
         name: 'detail',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) {
           final animeId = state.pathParameters['id'] ?? '';
           return DetailScreen(animeId: animeId);
         },
       ),
-      // Shell with bottom nav (IndexedStack keeps state per tab)
+
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navShell) => BottomNavigationShell(child: navShell),
+        builder: (context, state, navigationShell) {
+          return BottomNavigationShell(navigationShell: navigationShell);
+        },
         branches: [
           StatefulShellBranch(
-            navigatorKey: _homeBranchKey,
             routes: [
               GoRoute(
                 path: AppRoutes.home,
@@ -69,7 +82,6 @@ GoRouter createRouter() {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _favBranchKey,
             routes: [
               GoRoute(
                 path: AppRoutes.favorites,
@@ -79,7 +91,6 @@ GoRouter createRouter() {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _profileBranchKey,
             routes: [
               GoRoute(
                 path: AppRoutes.profile,
@@ -98,7 +109,10 @@ GoRouter createRouter() {
           children: [
             const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('404 - Page Not Found', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              '404 - Page Not Found',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 8),
             Text('Path: ${state.uri.path}'),
             const SizedBox(height: 16),
@@ -111,4 +125,12 @@ GoRouter createRouter() {
       ),
     ),
   );
+}
+
+class AuthStateNotifier extends ChangeNotifier {
+  AuthStateNotifier() {
+    FirebaseAuth.instance.authStateChanges().listen((_) {
+      notifyListeners();
+    });
+  }
 }
