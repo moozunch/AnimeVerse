@@ -90,8 +90,8 @@ For issues, suggestions, or support, please open an issue on the [GitHub Issues 
 
 -----
 
-## School Assignment
+## College Assignment
 - Nama Lengkap : Annisa Putri Aprilia
-- Nim : 231401036
+- NIM : 231401036
 - LAB PEMROGRAMAN MOBILE 5
 - [VIDEO DEMO](https://drive.google.com/file/d/1wr5mHyYJTUGnU4WOHBOMvywJriYINuLv/view?usp=sharing)
