@@ -87,3 +87,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact / Support
 
 For issues, suggestions, or support, please open an issue on the [GitHub Issues page](https://github.com/moozunch/AnimeFirst/issues).
+
+-----
+
+## School Assignment
+- Nama Lengkap : Annisa Putri Aprilia
+- Nim : 231401036
+- LAB PEMROGRAMAN MOBILE 5
+- [VIDEO DEMO](https://drive.google.com/file/d/1wr5mHyYJTUGnU4WOHBOMvywJriYINuLv/view?usp=sharing)
