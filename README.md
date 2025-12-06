@@ -65,7 +65,7 @@ AnimeVerse is a Flutter app for discovering, searching, and managing your favori
 ## Release Information
 
 - **Current Version:** v1.1.0
-- **Release Date:** December 6, 2025
+- **Release Date:** December 3, 2025
 - **Download:** [Latest Release](https://github.com/moozunch/animeVerse/releases)
 
 ## Changelog
